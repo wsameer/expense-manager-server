@@ -45,7 +45,7 @@ export default class SessionController {
   async destroy({ auth, response }: HttpContext) {
     await auth.use('web').logout()
     return response.send({
-      redirectTo: '/login',
+      success: true,
     })
   }
 }
