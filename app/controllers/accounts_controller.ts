@@ -9,8 +9,6 @@ export default class AccountsController {
      * First, authenticate the user
      */
     await auth.authenticate()
-
-    
   }
 
   /**

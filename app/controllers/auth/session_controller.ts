@@ -31,7 +31,7 @@ export default class SessionController {
     await auth.use('web').login(user)
 
     /**
-     * Step 4: Send them to a protected route
+     * Step 4: send user info back
      */
     response.send({
       data: user,

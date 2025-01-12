@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
-// TESTING 
+// TESTING
 export default class UsersController {
   /**
    * Display a list of resource

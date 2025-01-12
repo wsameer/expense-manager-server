@@ -5,8 +5,11 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.alterTable(this.tableName, (table) => {
+      
       table.string('name').notNullable()
+
       table.boolean('is_default').defaultTo(false)
+    
     })
   }
 
