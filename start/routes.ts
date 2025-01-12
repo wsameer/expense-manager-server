@@ -33,6 +33,7 @@ router
   .group(() => {
     router.get('/users', [UsersController, 'index']).as('get-all-users')
 
+    router.get('/accounts', [AccountsController, 'index']).as('get-accounts')
     router.post('/accounts', [AccountsController, 'store']).as('create-account')
   })
   .use(middleware.auth()) // default guard is 'web' set in config/auth.ts

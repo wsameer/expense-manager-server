@@ -1,5 +1,4 @@
 import { errors } from '@vinejs/vine'
-import hash from '@adonisjs/core/services/hash'
 import type { HttpContext } from '@adonisjs/core/http'
 
 import User from '#models/user'
