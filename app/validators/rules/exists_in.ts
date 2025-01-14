@@ -8,8 +8,8 @@ type Options = {
 }
 
 async function existsIn(value: unknown, options: Options, field: FieldContext) {
-  if (typeof value !== 'number') {
-    return
+  if (!value || typeof value !== 'number') {
+    return true
   }
 
   const record = await db

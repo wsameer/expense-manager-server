@@ -7,10 +7,10 @@ export const createAccountValidator = vine.compile(
     name: vine.string().trim().minLength(3).maxLength(48),
     group: vine.enum(AccountType),
     balance: vine.number().decimal([0, 2]),
-    paymentAccountId: vine
+    payment_account_id: vine
       .number()
-      .use(existsInRule({ table: 'accounts', column: 'id' }))
-      .nullable(),
+      .optional()
+      .use(existsInRule({ table: 'accounts', column: 'id' })),
     description: vine.string().trim().escape().maxLength(300).nullable(),
   })
 )
