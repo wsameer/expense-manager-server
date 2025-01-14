@@ -9,6 +9,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+const AccountStatsController = () => import('#controllers/account_stats_controller')
 const UsersController = () => import('#controllers/users_controller')
 const AccountsController = () => import('#controllers/accounts_controller')
 const SessionController = () => import('#controllers/auth/session_controller')
@@ -35,6 +36,7 @@ router
 
     router.get('/accounts', [AccountsController, 'index']).as('get-accounts')
     router.post('/accounts', [AccountsController, 'store']).as('create-account')
+    router.get('/accounts-stats', [AccountStatsController, 'index']).as('get-account-stats')
   })
   .use(middleware.auth()) // default guard is 'web' set in config/auth.ts
   .as('protected-routes')

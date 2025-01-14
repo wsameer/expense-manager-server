@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import { createAccountValidator } from '#validators/account'
 import Account from '#models/account'
+import { AccountType } from '../types/accounts.js'
 
 export default class AccountsController {
   /**
@@ -25,8 +26,6 @@ export default class AccountsController {
           message: 'Please login to access this resource',
         })
       }
-
-      logger.error('AccountsController.index error:', error)
 
       return response.internalServerError({
         success: false,
@@ -51,7 +50,7 @@ export default class AccountsController {
     try {
       const validatedData = await request.validateUsing(createAccountValidator)
 
-      if (validatedData.group === 'CREDIT_CARD' && validatedData.paymentAccountId === null) {
+      if (validatedData.group === AccountType[2] && validatedData.paymentAccountId === null) {
         return response.badRequest({
           success: false,
           error: 'Credit card accounts must have a payment account.',
