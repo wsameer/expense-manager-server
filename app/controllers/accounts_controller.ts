@@ -50,7 +50,7 @@ export default class AccountsController {
     try {
       const validatedData = await request.validateUsing(createAccountValidator)
 
-      if (validatedData.group === AccountType[2] && validatedData.paymentAccountId === null) {
+      if (validatedData.group === AccountType[2] && validatedData.payment_account_id === null) {
         return response.badRequest({
           success: false,
           error: 'Credit card accounts must have a payment account.',
@@ -62,7 +62,7 @@ export default class AccountsController {
         userId: user.id,
         group: validatedData.group,
         balance: validatedData.balance,
-        paymentAccountId: validatedData.paymentAccountId,
+        paymentAccountId: validatedData.payment_account_id,
         description: validatedData.description ?? '',
       })
 
@@ -88,18 +88,18 @@ export default class AccountsController {
     }
   }
 
-  /**
-   * Show individual record
-   */
-  async show({ params }: HttpContext) {}
+  // /**
+  //  * Show individual record
+  //  */
+  // async show({ params }: HttpContext) {}
 
-  /**
-   * Handle form submission for the edit action
-   */
-  async update({ params, request }: HttpContext) {}
+  // /**
+  //  * Handle form submission for the edit action
+  //  */
+  // async update({ params, request }: HttpContext) {}
 
-  /**
-   * Delete record
-   */
-  async destroy({ params }: HttpContext) {}
+  // /**
+  //  * Delete record
+  //  */
+  // async destroy({ params }: HttpContext) {}
 }
