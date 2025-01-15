@@ -36,6 +36,10 @@ router
 
     router.get('/accounts', [AccountsController, 'index']).as('get-accounts')
     router.post('/accounts', [AccountsController, 'store']).as('create-account')
+    router.get('/accounts/:id', [AccountsController, 'show']).as('get-account')
+    router.put('/accounts/:id', [AccountsController, 'update']).as('update-account')
+    router.delete('/accounts/:id', [AccountsController, 'destroy']).as('delete-account')
+
     router.get('/accounts-stats', [AccountStatsController, 'index']).as('get-account-stats')
   })
   .use(middleware.auth()) // default guard is 'web' set in config/auth.ts

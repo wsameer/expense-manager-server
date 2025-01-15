@@ -88,18 +88,51 @@ export default class AccountsController {
     }
   }
 
-  // /**
-  //  * Show individual record
-  //  */
-  // async show({ params }: HttpContext) {}
+  /**
+   * Show individual record
+   */
+  async show({ params, bouncer, auth, response }: HttpContext) {
+    await auth.authenticate()
 
-  // /**
-  //  * Handle form submission for the edit action
-  //  */
-  // async update({ params, request }: HttpContext) {}
+    const account = await Account.findByOrFail('id', params.id)
 
-  // /**
-  //  * Delete record
-  //  */
-  // async destroy({ params }: HttpContext) {}
+    if (await bouncer.with('AccountPolicy').denies('view', account)) {
+      return response.forbidden({
+        success: false,
+        message: 'You cannot view this account',
+      })
+    }
+
+    return response.ok({
+      success: true,
+      data: account,
+    })
+  }
+
+  /**
+   * Handle form submission for the edit action
+   */
+  async update({ params, request }: HttpContext) {}
+
+  /**
+   * Delete record
+   */
+  async destroy({ params, auth, bouncer, response }: HttpContext) {
+    await auth.authenticate()
+
+    const account = await Account.findByOrFail(params.id)
+
+    if (await bouncer.with('AccountPolicy').denies('view', account)) {
+      return response.forbidden({
+        success: false,
+        message: 'You cannot view this account',
+      })
+    }
+
+    await account.delete()
+
+    return response.ok({
+      success: true,
+    })
+  }
 }
