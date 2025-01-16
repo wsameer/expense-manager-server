@@ -22,14 +22,12 @@ export default class AccountsController {
     } catch (error) {
       if (error.code === 'E_UNAUTHORIZED') {
         return response.unauthorized({
-          success: false,
-          message: 'Please login to access this resource',
+          errors: [{ message: 'Please login to access this resource' }],
         })
       }
 
       return response.internalServerError({
-        success: false,
-        message: 'An error occurred while fetching accounts',
+        errors: [{ message: 'An error occurred while fetching accounts' }],
       })
     }
   }
@@ -42,8 +40,7 @@ export default class AccountsController {
 
     if (await bouncer.with('AccountPolicy').denies('create')) {
       return response.forbidden({
-        success: false,
-        error: 'You cannot create an account',
+        error: [{ message: 'You cannot create an account' }],
       })
     }
 
@@ -52,8 +49,7 @@ export default class AccountsController {
 
       if (validatedData.group === AccountType[2] && validatedData.payment_account_id === null) {
         return response.badRequest({
-          success: false,
-          error: 'Credit card accounts must have a payment account.',
+          error: [{ message: 'Credit card accounts must have a payment account.' }],
         })
       }
 
@@ -74,16 +70,13 @@ export default class AccountsController {
       logger.error(error)
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return response.badRequest({
-          status: 'error',
           errors: error.messages,
-          message: 'Validation failed',
         })
       }
 
       // Handle unexpected errors
       return response.internalServerError({
-        status: 'error',
-        message: 'Something went wrong',
+        errors: [{ message: 'Something went wrong' }],
       })
     }
   }
@@ -94,12 +87,11 @@ export default class AccountsController {
   async show({ params, bouncer, auth, response }: HttpContext) {
     await auth.authenticate()
 
-    const account = await Account.findByOrFail('id', params.id)
+    const account = await Account.findOrFail(params.id)
 
     if (await bouncer.with('AccountPolicy').denies('view', account)) {
       return response.forbidden({
-        success: false,
-        message: 'You cannot view this account',
+        errors: [{ message: 'You cannot view this account' }],
       })
     }
 
@@ -112,7 +104,45 @@ export default class AccountsController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ params, request }: HttpContext) {}
+  async update({ params, auth, bouncer, request, response }: HttpContext) {
+    await auth.authenticate()
+
+    const account = await Account.findOrFail(params.id)
+
+    // Check if the user has permission to update this account
+    await bouncer.with('AccountPolicy').authorize('update', account)
+
+    try {
+      const validatedData = await request.validateUsing(createAccountValidator)
+
+      if (validatedData.group === AccountType[2] && !validatedData.payment_account_id) {
+        return response.unprocessableEntity({
+          success: false,
+          errors: [{ message: 'Credit card accounts must have a payment account.' }],
+        })
+      }
+
+      // Update the account with validated data
+      account.merge(validatedData)
+      await account.save()
+
+      return response.ok({
+        success: true,
+        data: account.toJSON(),
+      })
+    } catch (error) {
+      if (error instanceof errors.E_VALIDATION_ERROR) {
+        return response.unprocessableEntity({
+          errors: error.messages,
+        })
+      }
+
+      // Handle unexpected errors
+      return response.internalServerError({
+        errors: [{ message: 'An unexpected error occurred while updating the account.' }],
+      })
+    }
+  }
 
   /**
    * Delete record
@@ -124,8 +154,7 @@ export default class AccountsController {
 
     if (await bouncer.with('AccountPolicy').denies('view', account)) {
       return response.forbidden({
-        success: false,
-        message: 'You cannot view this account',
+        errors: [{ message: 'You cannot view this account' }],
       })
     }
 

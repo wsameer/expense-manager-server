@@ -17,7 +17,7 @@ export default class Account extends BaseModel {
   declare balance: number
 
   @column()
-  declare description?: string
+  declare description: string | null
 
   // Foreign key for User relationship
   @column()
