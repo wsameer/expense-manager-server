@@ -3,3 +3,4 @@ build
 tmp
 database
 tests
+pnpm-lock.yaml

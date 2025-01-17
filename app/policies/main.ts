@@ -14,5 +14,5 @@
 
 export const policies = {
   AccountPolicy: () => import('#policies/account_policy'),
-  TransactionPolicy: () => import('#policies/transaction_policy')
+  TransactionPolicy: () => import('#policies/transaction_policy'),
 }
