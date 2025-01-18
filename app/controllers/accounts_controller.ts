@@ -1,6 +1,7 @@
 import { errors } from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
+
 import { createAccountValidator } from '#validators/account'
 import Account from '#models/account'
 import { AccountType } from '../types/accounts.js'
@@ -15,10 +16,7 @@ export default class AccountsController {
 
       const accounts = await Account.query().where('userId', user.id).orderBy('createdAt', 'desc')
 
-      return response.ok({
-        success: true,
-        data: accounts,
-      })
+      return response.ok(accounts)
     } catch (error) {
       if (error.code === 'E_UNAUTHORIZED') {
         return response.unauthorized({
@@ -62,10 +60,7 @@ export default class AccountsController {
         description: validatedData.description ?? '',
       })
 
-      return response.ok({
-        success: true,
-        data: account,
-      })
+      return response.ok(account.toJSON())
     } catch (error) {
       logger.error(error)
       if (error instanceof errors.E_VALIDATION_ERROR) {
@@ -95,10 +90,7 @@ export default class AccountsController {
       })
     }
 
-    return response.ok({
-      success: true,
-      data: account,
-    })
+    return response.ok(account.toJSON())
   }
 
   /**
@@ -117,7 +109,6 @@ export default class AccountsController {
 
       if (validatedData.group === AccountType[2] && !validatedData.payment_account_id) {
         return response.unprocessableEntity({
-          success: false,
           errors: [{ message: 'Credit card accounts must have a payment account.' }],
         })
       }
@@ -126,10 +117,7 @@ export default class AccountsController {
       account.merge(validatedData)
       await account.save()
 
-      return response.ok({
-        success: true,
-        data: account.toJSON(),
-      })
+      return response.ok(account.toJSON())
     } catch (error) {
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return response.unprocessableEntity({
@@ -152,9 +140,9 @@ export default class AccountsController {
 
     const account = await Account.findByOrFail(params.id)
 
-    if (await bouncer.with('AccountPolicy').denies('view', account)) {
+    if (await bouncer.with('AccountPolicy').denies('delete', account)) {
       return response.forbidden({
-        errors: [{ message: 'You cannot view this account' }],
+        errors: [{ message: 'You cannot delete this account' }],
       })
     }
 
