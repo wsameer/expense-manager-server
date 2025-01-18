@@ -1,10 +1,31 @@
+import Transaction from '#models/transaction'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class TransactionsController {
   /**
-   * Display a list of resource
+   * Display a list of transactions
    */
-  async index({}: HttpContext) {}
+  async index({ auth, response }: HttpContext) {
+    try {
+      const user = await auth.authenticate()
+
+      const transactions = await Transaction.query()
+        .where('userId', user.id)
+        .orderBy('createdAt', 'desc')
+
+      return response.ok(transactions)
+    } catch (error) {
+      if (error.code === 'E_UNAUTHORIZED') {
+        return response.unauthorized({
+          errors: [{ message: 'Please login to access this resource' }],
+        })
+      }
+
+      return response.internalServerError({
+        errors: [{ message: 'An error occurred while fetching all transactions' }],
+      })
+    }
+  }
 
   /**
    * Handle form submission for the create action
