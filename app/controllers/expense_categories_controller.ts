@@ -6,6 +6,8 @@ import {
   updateExpenseCategoryValidator,
 } from '#validators/expense_category'
 import { ForbiddenException } from '#exceptions/forbidden_exception.ts'
+import logger from '@adonisjs/core/services/logger'
+import { errors } from '@vinejs/vine'
 
 export default class ExpenseCategoriesController {
   /**
@@ -14,7 +16,10 @@ export default class ExpenseCategoriesController {
    */
   async index({ auth }: HttpContext) {
     const user = await auth.authenticate()
-    const categories = await ExpenseCategory.findManyBy({ userId: user.id })
+    const categories = await ExpenseCategory.query()
+      .where('userId', user.id)
+      .preload('expenseSubcategories')
+      .orderBy('updatedAt', 'desc')
     return categories
   }
 
@@ -95,13 +100,40 @@ export default class ExpenseCategoriesController {
   async destroy({ bouncer, auth, params }: HttpContext) {
     await auth.authenticate()
 
+    // validation
+    if (!params.id || Number.isNaN(params.id)) {
+      throw new errors.E_VALIDATION_ERROR('Category Id is required or invalid')
+    }
+
     const category = await ExpenseCategory.findByOrFail(params)
 
     if (await bouncer.with('ExpenseCategoryPolicy').denies('delete', category)) {
       throw new ForbiddenException('You are not authorized to delete this category')
     }
 
+    const subCategories = await category.related('expenseSubcategories').query()
+
+    // Delete all subcategories
+    if (subCategories.length > 0) {
+      await ExpenseCategory.query()
+        .whereIn(
+          'id',
+          subCategories.map((sub) => sub.id)
+        )
+        .delete()
+
+      logger.log('info', '[ExpenseCategoriesController] Subcategories deleted', {
+        parentId: category.id,
+        deletedSubcategories: subCategories.map((sub) => sub.id),
+      })
+    }
+
+    // Delete the parent category
     await category.delete()
+
+    logger.log('info', '[ExpenseCategoriesController] Expense Category deleted', {
+      id: category.id,
+    })
 
     return { success: true }
   }

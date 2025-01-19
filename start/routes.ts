@@ -56,31 +56,31 @@ router
   .as('user-routes')
   .prefix('api')
 
-router
-  .group(() => {
-    router
-      .get('/income-categories', [IncomeCategoriesController, 'index'])
-      .as('get-income-categories')
+// router
+//   .group(() => {
+//     router
+//       .get('/income-categories', [IncomeCategoriesController, 'index'])
+//       .as('get-income-categories')
 
-    router
-      .post('/income-categories', [IncomeCategoriesController, 'store'])
-      .as('create-income-category')
+//     router
+//       .post('/income-categories', [IncomeCategoriesController, 'store'])
+//       .as('create-income-category')
 
-    router
-      .get('/income-category/:id', [IncomeCategoriesController, 'show'])
-      .as('get-income-category')
+//     router
+//       .get('/income-category/:id', [IncomeCategoriesController, 'show'])
+//       .as('get-income-category')
 
-    router
-      .put('/income-category/:id', [IncomeCategoriesController, 'update'])
-      .as('update-income-category')
+//     router
+//       .put('/income-category/:id', [IncomeCategoriesController, 'update'])
+//       .as('update-income-category')
 
-    router
-      .delete('/income-categories/:id', [IncomeCategoriesController, 'destroy'])
-      .as('delete-income-category')
-  })
-  .use(middleware.auth())
-  .as('income-categories-routes')
-  .prefix('api')
+//     router
+//       .delete('/income-categories/:id', [IncomeCategoriesController, 'destroy'])
+//       .as('delete-income-category')
+//   })
+//   .use(middleware.auth())
+//   .as('income-categories-routes')
+//   .prefix('api')
 
 router
   .group(() => {
@@ -111,23 +111,28 @@ router
 router
   .group(() => {
     router
-      .get('/expense-subcategories', [ExpenseSubcategoriesController, 'index'])
-      .as('get-expense-subcategories')
-
-    router
-      .post('/expense-subcategories', [ExpenseSubcategoriesController, 'store'])
+      .post('/expense-categories/:id/subcategories', [ExpenseSubcategoriesController, 'store'])
       .as('create-expense-subcategory')
 
     router
-      .get('/expense-subcategories/:id', [ExpenseSubcategoriesController, 'show'])
+      .get('/expense-categories/:id/subcategories/:sub_id', [
+        ExpenseSubcategoriesController,
+        'show',
+      ])
       .as('get-expense-subcategory')
 
     router
-      .put('/expense-subcategories/:id', [ExpenseSubcategoriesController, 'update'])
+      .put('/expense-categories/:id/subcategories/:sub_id', [
+        ExpenseSubcategoriesController,
+        'update',
+      ])
       .as('update-expense-subcategory')
 
     router
-      .delete('/expense-subcategories/:id', [ExpenseSubcategoriesController, 'destroy'])
+      .delete('/expense-categories/:id/subcategories/:sub_id', [
+        ExpenseSubcategoriesController,
+        'destroy',
+      ])
       .as('delete-expense-subcategory')
   })
   .use(middleware.auth())

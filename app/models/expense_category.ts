@@ -22,7 +22,9 @@ export default class ExpenseCategory extends BaseModel {
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
 
-  @hasMany(() => ExpenseSubcategory)
+  @hasMany(() => ExpenseSubcategory, {
+    serializeAs: 'subcategories',
+  })
   declare expenseSubcategories: HasMany<typeof ExpenseSubcategory>
 
   @hasMany(() => Transaction)

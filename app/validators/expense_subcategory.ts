@@ -10,3 +10,13 @@ export const createExpenseSubcategoryValidator = vine.compile(
     name: vine.string().trim().minLength(3).maxLength(48),
   })
 )
+
+export const updateExpenseSubcategoryValidator = vine.compile(
+  vine.object({
+    subId: vine
+      .number()
+      .optional()
+      .use(existsInRule({ table: 'expense_subcategories', column: 'id' })),
+    name: vine.string().trim().minLength(3).maxLength(48),
+  })
+)

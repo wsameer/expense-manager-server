@@ -30,7 +30,6 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     }
 
     return response.status(status || 500).json({
-      success: false,
       message: message,
       code: code,
       ...(this.debug ? { stack: stack } : {}),
