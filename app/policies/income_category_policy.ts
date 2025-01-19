@@ -4,11 +4,8 @@ import { BasePolicy } from '@adonisjs/bouncer'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 
 export default class IncomeCategoryPolicy extends BasePolicy {
-  /**
-   * Every logged-in user can create an income category
-   */
-  create(): AuthorizerResponse {
-    return true
+  create(user: User): AuthorizerResponse {
+    return user.id !== null
   }
 
   view(user: User, incomeCategory: IncomeCategory): AuthorizerResponse {

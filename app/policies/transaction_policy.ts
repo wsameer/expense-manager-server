@@ -11,30 +11,18 @@ export default class TransactionPolicy extends BasePolicy {
     super()
   }
 
-  /**
-   * Every logged-in user can create a transaction
-   */
-  create(): AuthorizerResponse {
-    return true
+  create(user: User): AuthorizerResponse {
+    return user.id !== null
   }
 
-  /**
-   * Only the transaction creator can view the transaction
-   */
   view(user: User, transaction: Transaction): AuthorizerResponse {
     return user.id === transaction.userId
   }
 
-  /**
-   * Only the transaction creator can edit the transaction
-   */
   update(user: User, transaction: Transaction): AuthorizerResponse {
     return user.id === transaction.userId
   }
 
-  /**
-   * Only the transaction creator can delete the transaction
-   */
   delete(user: User, transaction: Transaction): AuthorizerResponse {
     return user.id === transaction.userId
   }

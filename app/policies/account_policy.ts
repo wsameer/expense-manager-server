@@ -11,35 +11,23 @@ export default class AccountPolicy extends BasePolicy {
     super()
   }
 
-  /**
-   * Every logged-in user can create an account
-   */
-  create(): AuthorizerResponse {
-    return true
+  create(user: User): AuthorizerResponse {
+    return user.id !== null
   }
 
-  /**
-   * Only the account creator can view the account
-   */
   view(user: User, account: Account): AuthorizerResponse {
     return user.id === account.userId
   }
 
-  /**
-   * Only the account creator can edit the account
-   */
   update(user: User, account: Account): AuthorizerResponse {
     return user.id === account.userId
   }
 
-  /**
-   * Only the account creator can delete the account
-   */
   delete(user: User, account: Account): AuthorizerResponse {
     return user.id === account.userId
   }
 
-  deleteAll(): AuthorizerResponse {
-    return true
+  deleteAll(user: User): AuthorizerResponse {
+    return user.id !== null
   }
 }
