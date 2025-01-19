@@ -30,9 +30,7 @@ export default class ExpenseCategoriesController {
   async store({ auth, bouncer, request }: HttpContext) {
     const user = await auth.authenticate()
 
-    if (await bouncer.with('ExpenseCategoryPolicy').denies('create')) {
-      throw new ForbiddenException('You are not allowed to created a category')
-    }
+    await bouncer.with('ExpenseCategoryPolicy').allows('create')
 
     const validatedData = await createExpenseCategoryValidator.validate({
       ...request.all(),

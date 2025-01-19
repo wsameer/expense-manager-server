@@ -56,31 +56,31 @@ router
   .as('user-routes')
   .prefix('api')
 
-// router
-//   .group(() => {
-//     router
-//       .get('/income-categories', [IncomeCategoriesController, 'index'])
-//       .as('get-income-categories')
+router
+  .group(() => {
+    router
+      .get('/income-categories', [IncomeCategoriesController, 'index'])
+      .as('get-income-categories')
 
-//     router
-//       .post('/income-categories', [IncomeCategoriesController, 'store'])
-//       .as('create-income-category')
+    router
+      .post('/income-categories', [IncomeCategoriesController, 'store'])
+      .as('create-income-category')
 
-//     router
-//       .get('/income-category/:id', [IncomeCategoriesController, 'show'])
-//       .as('get-income-category')
+    router
+      .get('/income-categories/:id', [IncomeCategoriesController, 'show'])
+      .as('get-income-category')
 
-//     router
-//       .put('/income-category/:id', [IncomeCategoriesController, 'update'])
-//       .as('update-income-category')
+    router
+      .put('/income-categories/:id', [IncomeCategoriesController, 'update'])
+      .as('update-income-category')
 
-//     router
-//       .delete('/income-categories/:id', [IncomeCategoriesController, 'destroy'])
-//       .as('delete-income-category')
-//   })
-//   .use(middleware.auth())
-//   .as('income-categories-routes')
-//   .prefix('api')
+    router
+      .delete('/income-categories/:id', [IncomeCategoriesController, 'destroy'])
+      .as('delete-income-category')
+  })
+  .use(middleware.auth())
+  .as('income-categories-routes')
+  .prefix('api')
 
 router
   .group(() => {

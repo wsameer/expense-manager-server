@@ -10,7 +10,7 @@ export default class AccountsController {
   async index({ auth }: HttpContext) {
     const user = await auth.authenticate()
 
-    const accounts = await Account.query().where('userId', user.id).orderBy('createdAt', 'desc')
+    const accounts = await Account.query().where('userId', user.id).orderBy('updatedAt', 'desc')
 
     return accounts
   }
@@ -38,12 +38,8 @@ export default class AccountsController {
     }
 
     const account = await Account.create({
-      name: validatedData.name,
+      ...validatedData,
       userId: user.id,
-      group: validatedData.group,
-      balance: validatedData.balance,
-      paymentAccountId: validatedData.payment_account_id,
-      description: validatedData.description ?? '',
     })
 
     return account

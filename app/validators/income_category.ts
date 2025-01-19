@@ -11,3 +11,11 @@ export const createIncomeCategoryValidator = vine.compile(
     description: vine.string().trim().escape().maxLength(300).nullable(),
   })
 )
+
+export const updateIncomeCategoryValidator = vine.compile(
+  vine.object({
+    id: vine.number().use(existsInRule({ table: 'income_categories', column: 'id' })),
+    name: vine.string().trim().minLength(3).maxLength(48),
+    description: vine.string().trim().escape().maxLength(300).nullable(),
+  })
+)
