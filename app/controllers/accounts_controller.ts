@@ -15,6 +15,10 @@ export default class AccountsController {
     return accounts
   }
 
+  /**
+   * Create a new account
+   * @returns newly create account details
+   */
   async store({ bouncer, auth, request }: HttpContext) {
     const user = await auth.authenticate()
 
@@ -45,6 +49,11 @@ export default class AccountsController {
     return account
   }
 
+  /**
+   * Get account details by id
+   * @param param account id
+   * @returns fetched account details
+   */
   async show({ params, bouncer, auth }: HttpContext) {
     await auth.authenticate()
 
@@ -57,6 +66,10 @@ export default class AccountsController {
     return account
   }
 
+  /**
+   * PUT
+   * Update existing account
+   */
   async update({ params, auth, bouncer, request }: HttpContext) {
     await auth.authenticate()
 
@@ -78,15 +91,16 @@ export default class AccountsController {
     return account
   }
 
-  async destroy({ params, auth, bouncer, response }: HttpContext) {
+  /**
+   * DELETE an account
+   */
+  async destroy({ params, auth, bouncer }: HttpContext) {
     await auth.authenticate()
 
     const account = await Account.findByOrFail(params.id)
 
     if (await bouncer.with('AccountPolicy').denies('delete', account)) {
-      return response.forbidden({
-        errors: [{ message: 'You cannot delete this account' }],
-      })
+      throw new ForbiddenException('You cannot delete this account')
     }
 
     await account.delete()

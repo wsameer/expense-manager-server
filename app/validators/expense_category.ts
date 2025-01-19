@@ -11,3 +11,10 @@ export const createExpenseCategoryValidator = vine.compile(
     isDefault: vine.boolean().optional(),
   })
 )
+
+export const updateExpenseCategoryValidator = vine.compile(
+  vine.object({
+    name: vine.string().trim().minLength(3).maxLength(48),
+    id: vine.number().use(existsInRule({ table: 'expense_categories', column: 'id' })),
+  })
+)
