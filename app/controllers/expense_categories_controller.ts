@@ -45,11 +45,17 @@ export default class ExpenseCategoriesController {
 
   /**
    * Get expense category by id
+   * @param param0 id of the category to get
+   * @returns category details along with all its subcategories
    */
   async show({ params, bouncer, auth }: HttpContext) {
     await auth.authenticate()
 
-    const category = await ExpenseCategory.findByOrFail(params)
+    const category = await ExpenseCategory.query()
+      .where('id', params.id)
+      .preload('expenseSubcategories')
+      .firstOrFail()
+
     if (await bouncer.with('ExpenseCategoryPolicy').denies('view', category)) {
       throw new ForbiddenException('You are not allowed to view this expense category')
     }
@@ -57,6 +63,11 @@ export default class ExpenseCategoriesController {
     return category
   }
 
+  /**
+   * Update an expense category
+   * @param param0 id of the category to update
+   * @returns update category details
+   */
   async update({ auth, bouncer, params, request }: HttpContext) {
     await auth.authenticate()
 
@@ -78,6 +89,9 @@ export default class ExpenseCategoriesController {
     return category
   }
 
+  /**
+   * Delete an expense category
+   */
   async destroy({ bouncer, auth, params }: HttpContext) {
     await auth.authenticate()
 
