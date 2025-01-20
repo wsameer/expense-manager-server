@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 
 import ExpenseCategory from '#models/expense_category'
 import {
@@ -6,8 +7,7 @@ import {
   updateExpenseCategoryValidator,
 } from '#validators/expense_category'
 import { ForbiddenException } from '#exceptions/forbidden_exception.ts'
-import logger from '@adonisjs/core/services/logger'
-import { errors } from '@vinejs/vine'
+import { idValidator } from '#validators/route_id'
 
 export default class ExpenseCategoriesController {
   /**
@@ -32,13 +32,10 @@ export default class ExpenseCategoriesController {
 
     await bouncer.with('ExpenseCategoryPolicy').allows('create')
 
-    const validatedData = await createExpenseCategoryValidator.validate({
-      ...request.all(),
-      userId: user.id,
-    })
+    const validatedData = await request.validateUsing(createExpenseCategoryValidator)
 
     const category = await ExpenseCategory.create({
-      userId: validatedData.userId,
+      userId: user.id,
       name: validatedData.name,
       isDefault: validatedData.isDefault ?? false,
     })
@@ -54,8 +51,10 @@ export default class ExpenseCategoriesController {
   async show({ params, bouncer, auth }: HttpContext) {
     await auth.authenticate()
 
+    const validatedData = await idValidator('expense_categories').validate(params)
+
     const category = await ExpenseCategory.query()
-      .where('id', params.id)
+      .where('id', validatedData.id)
       .preload('expenseSubcategories')
       .firstOrFail()
 
@@ -98,10 +97,8 @@ export default class ExpenseCategoriesController {
   async destroy({ bouncer, auth, params }: HttpContext) {
     await auth.authenticate()
 
-    // validation
-    if (!params.id || Number.isNaN(params.id)) {
-      throw new errors.E_VALIDATION_ERROR('Category Id is required or invalid')
-    }
+    // validating the id
+    await idValidator('expense_categories').validate(params)
 
     const category = await ExpenseCategory.findByOrFail(params)
 

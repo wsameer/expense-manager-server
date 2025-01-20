@@ -8,8 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
-import { middleware } from './kernel.js'
-
+const TransactionsController = () => import('#controllers/transactions_controller')
 const IncomeCategoriesController = () => import('#controllers/income_categories_controller')
 const ExpenseSubcategoriesController = () => import('#controllers/expense_subcategories_controller')
 const ExpenseCategoriesController = () => import('#controllers/expense_categories_controller')
@@ -18,6 +17,8 @@ const UsersController = () => import('#controllers/users_controller')
 const AccountsController = () => import('#controllers/accounts_controller')
 const SessionController = () => import('#controllers/auth/session_controller')
 const RegisterController = () => import('#controllers/auth/register_controller')
+
+import { middleware } from './kernel.js'
 
 router.get('/', async () => {
   return {
@@ -137,4 +138,18 @@ router
   })
   .use(middleware.auth())
   .as('expense-subcategories-routes')
+  .prefix('api')
+
+router
+  .group(() => {
+    router.get('/transactions', [TransactionsController, 'index']).as('get-transactions')
+
+    router.post('/transactions', [TransactionsController, 'store']).as('create-transaction')
+
+    router.put('/transactions/:id', [TransactionsController, 'update']).as('update-transaction')
+
+    router.delete('/transactions/:id', [TransactionsController, 'destroy']).as('delete-transaction')
+  })
+  .use(middleware.auth())
+  .as('transactions-routes')
   .prefix('api')

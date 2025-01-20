@@ -6,9 +6,7 @@ import { type BelongsTo } from '@adonisjs/lucid/types/relations'
 import ExpenseCategory from './expense_category.js'
 import ExpenseSubcategory from './expense_subcategory.js'
 import IncomeCategory from './income_category.js'
-
-// Define transaction types
-type TransactionType = 'bank_to_bank' | 'expense' | 'income'
+import { TransactionType } from '../types/transactions.js'
 
 export default class Transaction extends BaseModel {
   @column({ isPrimary: true })
@@ -17,11 +15,11 @@ export default class Transaction extends BaseModel {
   @column()
   declare userId: number
 
-  @column()
+  @column.date()
   declare date: DateTime
 
   @column()
-  declare type: TransactionType
+  declare type: typeof TransactionType
 
   @column()
   declare amount: number
