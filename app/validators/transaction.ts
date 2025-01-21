@@ -1,27 +1,74 @@
 import vine from '@vinejs/vine'
-import { TransactionType } from '../types/transactions.js'
 import { existsInRule } from './rules/exists_in.js'
+import { TransactionType } from '../types/transactions.js'
+import { luxonDateRule } from './rules/luxon_date.js'
+
+const transactionTypes = Object.values(TransactionType).filter(
+  (value) => typeof value === 'string'
+) as TransactionType[]
 
 export const createTransactionValidator = vine.compile(
   vine.object({
-    type: vine.enum(TransactionType),
-    date: vine.date(), // YYYY-MM-DD or YYYY-MM-DD HH:mm:ss
+    type: vine.enum(transactionTypes),
+    date: vine.string().use(luxonDateRule()),
     amount: vine.number().decimal([0, 2]),
-    from_account_id: vine.number().use(existsInRule({ table: 'accounts', column: 'id' })),
+    from_account_id: vine
+      .number()
+      .optional()
+      .requiredWhen('type', '!=', TransactionType.INCOME)
+      .use(existsInRule({ table: 'accounts', column: 'id' })),
     to_account_id: vine
       .number()
       .optional()
-      .requiredWhen('type', '=', TransactionType[0])
+      .requiredWhen('type', '!=', TransactionType.EXPENSE)
       .use(existsInRule({ table: 'accounts', column: 'id' })),
     income_category_id: vine
       .number()
       .optional()
-      .requiredWhen('type', '=', TransactionType[2])
+      .requiredWhen('type', '=', TransactionType.INCOME)
       .use(existsInRule({ table: 'income_categories', column: 'id' })),
     expense_category_id: vine
       .number()
       .optional()
-      .requiredWhen('type', '=', TransactionType[1])
+      .requiredWhen('type', '=', TransactionType.EXPENSE)
+      .use(existsInRule({ table: 'expense_categories', column: 'id' })),
+    expense_subcategory_id: vine
+      .number()
+      .nullable()
+      .optional()
+      .use(existsInRule({ table: 'expense_subcategories', column: 'id' })),
+    note: vine.string().maxLength(255).nullable(),
+  })
+)
+
+export const updateTransactionValidator = vine.compile(
+  vine.object({
+    id: vine
+      .number()
+      .positive()
+      .use(existsInRule({ table: 'transactions', column: 'id' })),
+    type: vine.enum(transactionTypes),
+    date: vine.string().use(luxonDateRule()),
+    amount: vine.number().decimal([0, 2]),
+    from_account_id: vine
+      .number()
+      .optional()
+      .requiredWhen('type', '!=', TransactionType.INCOME)
+      .use(existsInRule({ table: 'accounts', column: 'id' })),
+    to_account_id: vine
+      .number()
+      .optional()
+      .requiredWhen('type', '!=', TransactionType.EXPENSE)
+      .use(existsInRule({ table: 'accounts', column: 'id' })),
+    income_category_id: vine
+      .number()
+      .optional()
+      .requiredWhen('type', '=', TransactionType.INCOME)
+      .use(existsInRule({ table: 'income_categories', column: 'id' })),
+    expense_category_id: vine
+      .number()
+      .optional()
+      .requiredWhen('type', '=', TransactionType.EXPENSE)
       .use(existsInRule({ table: 'expense_categories', column: 'id' })),
     expense_subcategory_id: vine
       .number()

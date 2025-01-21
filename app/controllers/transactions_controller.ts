@@ -1,12 +1,19 @@
-import Account from '#models/account'
-import Transaction from '#models/transaction'
-import { createTransactionValidator } from '#validators/transaction'
+import { DateTime } from 'luxon'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import { DateTime } from 'luxon'
-import { TransactionType } from '../types/transactions.js'
 
+import { idValidator } from '#validators/route_id'
+import Account from '#models/account'
+import Transaction from '#models/transaction'
+import { createTransactionValidator, updateTransactionValidator } from '#validators/transaction'
+import { TransactionType } from '../types/transactions.js'
+import { TransactionService } from '#services/transaction_service'
+
+@inject()
 export default class TransactionsController {
+  constructor(protected transactionService: TransactionService) {}
+
   async index({ auth }: HttpContext) {
     const user = await auth.authenticate()
 
@@ -33,7 +40,7 @@ export default class TransactionsController {
       ...validatedData,
       userId: user.id,
       type: validatedData.type as unknown as typeof TransactionType,
-      date: DateTime.fromISO(validatedData.date.toISOString()),
+      date: DateTime.fromISO(validatedData.date),
       note: validatedData.note ?? '',
     })
 
@@ -43,7 +50,7 @@ export default class TransactionsController {
       switch (validatedData.type) {
         case 'bank_to_bank':
           await Account.query({ client: trx })
-            .where('id', validatedData.from_account_id)
+            .where('id', validatedData.from_account_id!)
             .decrement('balance', validatedData.amount)
 
           await Account.query({ client: trx })
@@ -53,7 +60,7 @@ export default class TransactionsController {
 
         case 'expense':
           await Account.query({ client: trx })
-            .where('id', validatedData.from_account_id)
+            .where('id', validatedData.from_account_id!)
             .decrement('balance', validatedData.amount)
           break
 
@@ -75,9 +82,89 @@ export default class TransactionsController {
     return transaction
   }
 
-  async show({ params }: HttpContext) {}
+  /**
+   * Get details of a transaction
+   * @param param0 id of the transaction
+   */
+  async show({ auth, bouncer, params }: HttpContext) {
+    await auth.authenticate()
 
-  async update({ params, request }: HttpContext) {}
+    const validatedData = await idValidator('transactions').validate({ id: params.id })
 
-  async destroy({ params }: HttpContext) {}
+    const transaction = await Transaction.findOrFail(validatedData.id)
+
+    transaction.load((loader) => {
+      loader.load('fromAccount')
+      loader.load('toAccount')
+      loader.load('expenseCategory')
+      loader.load('expenseSubcategory')
+      loader.load('incomeCategory')
+    })
+
+    await bouncer.with('TransactionPolicy').allows('view', transaction)
+
+    return transaction
+  }
+
+  async update({ auth, bouncer, params, request }: HttpContext) {
+    await auth.authenticate()
+
+    const validatedData = await updateTransactionValidator.validate({
+      ...params,
+      ...request.all(),
+    })
+
+    const transaction = await Transaction.findOrFail(params.id)
+
+    await bouncer.with('TransactionPolicy').authorize('update', transaction)
+
+    // Perform update within transaction
+    await db.transaction(async (trx) => {
+      // Use transaction client for all queries
+      transaction.useTransaction(trx)
+
+      const oldAmount = transaction.amount
+      const newAmount = validatedData.amount ?? oldAmount
+
+      await Transaction.query({ client: trx }).preload('fromAccount')
+
+      if (transaction.type.toString() === TransactionType.BANK_TO_BANK) {
+        await Transaction.query({ client: trx }).preload('toAccount')
+      }
+
+      if (oldAmount !== newAmount) {
+        await this.transactionService.updateTransactionBalance(transaction, oldAmount, newAmount)
+      }
+
+      await transaction
+        .merge({
+          ...validatedData,
+          date: DateTime.fromISO(validatedData.date),
+          type: validatedData.type as unknown as typeof TransactionType,
+          note: validatedData.note ?? '',
+        })
+        .save()
+    })
+
+    // Load fresh data after transaction
+    await transaction.refresh()
+    return validatedData
+  }
+
+  /**
+   * Delete a transaction
+   */
+  async destroy({ auth, bouncer, params }: HttpContext) {
+    await auth.authenticate()
+
+    const validatedData = await idValidator('transactions').validate({ id: params.id })
+
+    const transaction = await Transaction.findOrFail(validatedData.id)
+
+    await bouncer.with('TransactionPolicy').allows('delete', transaction)
+
+    await transaction.delete()
+
+    return { success: true }
+  }
 }

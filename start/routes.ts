@@ -146,6 +146,8 @@ router
 
     router.post('/transactions', [TransactionsController, 'store']).as('create-transaction')
 
+    router.get('/transactions/:id', [TransactionsController, 'show']).as('get-transaction')
+
     router.put('/transactions/:id', [TransactionsController, 'update']).as('update-transaction')
 
     router.delete('/transactions/:id', [TransactionsController, 'destroy']).as('delete-transaction')

@@ -43,4 +43,14 @@ export default class Account extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  public async incrementBalance(amount: number) {
+    this.balance += amount
+    await this.save()
+  }
+
+  public async decrementBalance(amount: number) {
+    this.balance -= amount
+    await this.save()
+  }
 }

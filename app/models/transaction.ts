@@ -15,7 +15,7 @@ export default class Transaction extends BaseModel {
   @column()
   declare userId: number
 
-  @column.date()
+  @column.dateTime()
   declare date: DateTime
 
   @column()
