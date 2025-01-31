@@ -1,5 +1,6 @@
 import app from '@adonisjs/core/services/app'
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { errors as vineErrors } from '@vinejs/vine'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -12,8 +13,27 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * The method is used for handling errors and returning
    * response to the client
    */
-  async handle(error: unknown, ctx: HttpContext) {
-    return super.handle(error, ctx)
+  async handle(error: any, { response }: HttpContext) {
+    const { message, messages, code, stack, status } = error
+
+    if (code === 'E_UNAUTHORIZED') {
+      return response.unauthorized({
+        message: 'Please login to access this resource',
+      })
+    }
+
+    if (error instanceof vineErrors.E_VALIDATION_ERROR) {
+      return response.badRequest({
+        message: 'Invalid input parameters',
+        errors: messages,
+      })
+    }
+
+    return response.status(status || 500).json({
+      message: message,
+      code: code,
+      ...(this.debug ? { stack: stack } : {}),
+    })
   }
 
   /**

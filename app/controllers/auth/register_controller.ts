@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { errors } from '@vinejs/vine'
 import User from '#models/user'
 import { registerValidator } from '#validators/register'
+import UserRegistered from '#events/user_registered'
 
 export default class RegisterController {
   async store({ request, response }: HttpContext) {
@@ -10,16 +11,16 @@ export default class RegisterController {
       const data = await request.validateUsing(registerValidator)
 
       // Create user with validated data
-      await User.create({
+      const user = await User.create({
         name: data.name,
         email: data.email,
         password: data.password, // no need to has as it's already done in User model
       })
 
-      // const refreshedUser = await user.refresh()
+      const refreshedUser = await user.refresh()
 
       // Dispatch/emit event to create default accounts
-      // UserRegistered.dispatch(refreshedUser)
+      UserRegistered.dispatch(refreshedUser)
 
       return response.ok({ success: true })
     } catch (error) {
