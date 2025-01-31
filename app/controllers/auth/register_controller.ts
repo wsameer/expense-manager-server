@@ -10,7 +10,7 @@ export default class RegisterController {
       const data = await request.validateUsing(registerValidator)
 
       // Create user with validated data
-      const user = await User.create({
+      await User.create({
         name: data.name,
         email: data.email,
         password: data.password, // no need to has as it's already done in User model
