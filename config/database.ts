@@ -2,9 +2,9 @@ import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
-  connection: env.get('DATABASE_URL') || 'postgres',
+  connection: env.get('DATABASE_URL') || 'pg',
   connections: {
-    postgres: {
+    pg: {
       client: 'pg',
       connection: {
         host: env.get('DB_HOST'),
@@ -16,6 +16,7 @@ const dbConfig = defineConfig({
       migrations: {
         naturalSort: true,
         paths: ['database/migrations'],
+        disableRollbacksInProduction: true,
       },
     },
   },
