@@ -17,5 +17,5 @@ export const policies = {
   ExpenseCategoryPolicy: () => import('#policies/expense_category_policy'),
   IncomeCategoryPolicy: () => import('#policies/income_category_policy'),
   AccountPolicy: () => import('#policies/account_policy'),
-  TransactionPolicy: () => import('#policies/transaction_policy')
+  TransactionPolicy: () => import('#policies/transaction_policy'),
 }
