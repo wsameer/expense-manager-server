@@ -2,7 +2,7 @@ import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
-  connection: process.env.DATABASE_URL || 'pg',
+  connection: env.get('DATABASE_URL') || 'pg',
   connections: {
     pg: {
       client: 'pg',
