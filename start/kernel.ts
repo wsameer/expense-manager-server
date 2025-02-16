@@ -1,3 +1,4 @@
+console.log('DATABASE_URL:', process.env.DATABASE_URL)
 /*
 |--------------------------------------------------------------------------
 | HTTP kernel file
@@ -32,7 +33,12 @@ server.use([
  * The router middleware stack runs middleware on all the HTTP
  * requests with a registered route.
  */
-router.use([() => import('@adonisjs/core/bodyparser_middleware'), () => import('@adonisjs/session/session_middleware'), () => import('@adonisjs/auth/initialize_auth_middleware'), () => import('#middleware/initialize_bouncer_middleware')])
+router.use([
+  () => import('@adonisjs/core/bodyparser_middleware'),
+  () => import('@adonisjs/session/session_middleware'),
+  () => import('@adonisjs/auth/initialize_auth_middleware'),
+  () => import('#middleware/initialize_bouncer_middleware'),
+])
 
 /**
  * Named middleware collection must be explicitly assigned to
@@ -40,5 +46,5 @@ router.use([() => import('@adonisjs/core/bodyparser_middleware'), () => import('
  */
 export const middleware = router.named({
   guest: () => import('#middleware/guest_middleware'),
-  auth: () => import('#middleware/auth_middleware')
+  auth: () => import('#middleware/auth_middleware'),
 })
