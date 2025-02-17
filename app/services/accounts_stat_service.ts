@@ -5,24 +5,25 @@ import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export class AccountsStatService {
-  async calculateBalance(type: AccountStatsTypeEnum): Promise<number> {
+  async calculateBalance(type: AccountStatsTypeEnum, userId: number): Promise<number> {
     switch (type) {
       case AccountStatsType[0]: // assets
-        return this.calculateAssetsBalance()
+        return this.calculateAssetsBalance(userId)
 
       case AccountStatsType[1]: // debts
-        return this.calculateDebtsBalance()
+        return this.calculateDebtsBalance(userId)
 
       case AccountStatsType[2]: // total
-        return this.calculateNetBalance()
+        return this.calculateNetBalance(userId)
 
       default:
         return 0
     }
   }
 
-  private async calculateAssetsBalance() {
+  private async calculateAssetsBalance(userId: number) {
     const result = await Account.query()
+      .where('user_id', userId)
       .whereNot('group', AccountType[2])
       .sum('balance as total')
       .firstOrFail()
@@ -30,8 +31,9 @@ export class AccountsStatService {
     return Number(result?.$extras.total) || 0
   }
 
-  private async calculateDebtsBalance() {
+  private async calculateDebtsBalance(userId: number) {
     const result = await Account.query()
+      .where('user_id', userId)
       .where('group', AccountType[2])
       .sum('balance as total')
       .firstOrFail()
@@ -39,8 +41,9 @@ export class AccountsStatService {
     return Number(result?.$extras.total) || 0
   }
 
-  private async calculateNetBalance() {
+  private async calculateNetBalance(userId: number) {
     const result = await Account.query()
+      .where('user_id', userId)
       .select(
         db.raw(
           `

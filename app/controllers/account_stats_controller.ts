@@ -8,11 +8,13 @@ export default class AccountStatsController {
   constructor(private accountsStatService: AccountsStatService) {}
 
   async index({ auth, request }: HttpContext) {
-    await auth.authenticate()
+    const user = await auth.authenticate()
     const validatedData = await request.validateUsing(accountStatsValidator)
 
-    const totalBalance = await this.accountsStatService.calculateBalance(validatedData.type)
-
+    const totalBalance = await this.accountsStatService.calculateBalance(
+      validatedData.type,
+      user.id
+    )
     return {
       stat_type: validatedData.type,
       total_balance: totalBalance,
