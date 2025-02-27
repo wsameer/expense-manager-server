@@ -17,6 +17,9 @@ export default class IncomeCategory extends BaseModel {
   @column()
   declare description?: string
 
+  @column()
+  declare order: number
+
   // Relationships
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>

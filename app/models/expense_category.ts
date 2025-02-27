@@ -18,6 +18,9 @@ export default class ExpenseCategory extends BaseModel {
   @column()
   declare isDefault: boolean
 
+  @column()
+  declare order: number
+
   // Relationships
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
