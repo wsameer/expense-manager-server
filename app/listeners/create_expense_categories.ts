@@ -21,11 +21,12 @@ export default class CreateExpenseCategories {
       'Other',
     ]
 
-    const dataToInsert = defaultCategories.map((categoryName) => {
+    const dataToInsert = defaultCategories.map((categoryName, index) => {
       return {
         userId: event.user.id,
         name: categoryName,
         isDefault: true,
+        order: index + 1,
       }
     })
 

@@ -8,8 +8,13 @@ import {
 } from '#validators/expense_category'
 import { ForbiddenException } from '#exceptions/forbidden_exception'
 import { idValidator } from '#validators/route_id'
+import { inject } from '@adonisjs/core'
+import CategoryOrderManagementService from '#services/category_order_management_service'
 
+@inject()
 export default class ExpenseCategoriesController {
+  constructor(private categoryOrderManagementService: CategoryOrderManagementService) {}
+
   /**
    * GET all categories and subcategories for a user
    * @returns category object
@@ -19,7 +24,7 @@ export default class ExpenseCategoriesController {
     const categories = await ExpenseCategory.query()
       .where('userId', user.id)
       .preload('expenseSubcategories')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('order', 'asc')
     return categories
   }
 
@@ -38,6 +43,7 @@ export default class ExpenseCategoriesController {
       userId: user.id,
       name: validatedData.name,
       isDefault: validatedData.isDefault ?? false,
+      order: validatedData.order,
     })
 
     return category
@@ -123,8 +129,8 @@ export default class ExpenseCategoriesController {
       })
     }
 
-    // Delete the parent category
-    await category.delete()
+    // Delete the parent category and reorder the remaining
+    await this.categoryOrderManagementService.deleteWithReordering(ExpenseCategory, category)
 
     logger.log('info', '[ExpenseCategoriesController] Expense Category deleted', {
       id: category.id,

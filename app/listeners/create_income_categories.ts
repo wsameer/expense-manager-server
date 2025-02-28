@@ -19,10 +19,11 @@ export default class CreateIncomeCategories {
       'Refund',
     ]
 
-    const dataToInsert = defaultCategories.map((categoryName) => {
+    const dataToInsert = defaultCategories.map((categoryName, index) => {
       return {
         userId: event.user.id,
         name: categoryName,
+        order: index + 1,
       }
     })
 

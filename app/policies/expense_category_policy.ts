@@ -18,6 +18,7 @@ export default class ExpenseCategoryPolicy extends BasePolicy {
       userId?: number | undefined
       isDefault?: boolean | undefined
       name: string
+      order: number
     }
   ): AuthorizerResponse {
     return user.id === expenseCategory.userId

@@ -1,18 +1,21 @@
 import { ForbiddenException } from '#exceptions/forbidden_exception'
 import IncomeCategory from '#models/income_category'
+import CategoryOrderManagementService from '#services/category_order_management_service'
 import {
   createIncomeCategoryValidator,
   updateIncomeCategoryValidator,
 } from '#validators/income_category'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
+@inject()
 export default class IncomeCategoriesController {
+  constructor(private categoryOrderManagementService: CategoryOrderManagementService) {}
+
   async index({ auth }: HttpContext) {
     const user = await auth.authenticate()
 
-    const categories = await IncomeCategory.query()
-      .where('userId', user.id)
-      .orderBy('updatedAt', 'desc')
+    const categories = await IncomeCategory.query().where('userId', user.id).orderBy('order', 'asc')
 
     return categories
   }
@@ -85,6 +88,8 @@ export default class IncomeCategoriesController {
     }
 
     await incomeCategory.delete()
+    // Delete the parent category and reorder the remaining
+    await this.categoryOrderManagementService.deleteWithReordering(IncomeCategory, incomeCategory)
 
     return { success: true }
   }
