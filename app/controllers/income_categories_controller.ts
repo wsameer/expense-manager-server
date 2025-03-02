@@ -3,10 +3,12 @@ import IncomeCategory from '#models/income_category'
 import CategoryOrderManagementService from '#services/category_order_management_service'
 import {
   createIncomeCategoryValidator,
+  replaceIncomeCategoriesValidator,
   updateIncomeCategoryValidator,
 } from '#validators/income_category'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class IncomeCategoriesController {
@@ -78,6 +80,40 @@ export default class IncomeCategoriesController {
     return category
   }
 
+  async replace({ auth, bouncer, request }: HttpContext) {
+    const user = await auth.authenticate()
+
+    const { categories } = request.all()
+
+    const userId = user.id
+
+    try {
+      const validatedData = await replaceIncomeCategoriesValidator.validate(categories)
+
+      await db.transaction(async (trx) => {
+        for (const item of validatedData) {
+          const category = await IncomeCategory.findOrFail(item.id)
+
+          if (await bouncer.with('IncomeCategoryPolicy').denies('update', category)) {
+            throw new ForbiddenException('You are not authorized to update this category')
+          }
+
+          category.order = item.order
+          await category.useTransaction(trx).save()
+        }
+      })
+
+      // Get the updated categories in the new order
+      const updatedCategories = await IncomeCategory.query()
+        .where('user_id', userId)
+        .orderBy('order', 'asc')
+
+      return updatedCategories
+    } catch (error) {
+      throw error
+    }
+  }
+
   async destroy({ params, auth, bouncer }: HttpContext) {
     await auth.authenticate()
 
@@ -87,7 +123,6 @@ export default class IncomeCategoriesController {
       throw new ForbiddenException('You are not authorized to delete this income category')
     }
 
-    await incomeCategory.delete()
     // Delete the parent category and reorder the remaining
     await this.categoryOrderManagementService.deleteWithReordering(IncomeCategory, incomeCategory)
 

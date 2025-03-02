@@ -72,6 +72,10 @@ router
       .as('create-income-category')
 
     router
+      .put('/income-categories/replace', [IncomeCategoriesController, 'replace'])
+      .as('replace-income-categories')
+
+    router
       .get('/income-categories/totals', [IncomeCategoryTotalsController, 'index'])
       .as('income-categories.totals')
 

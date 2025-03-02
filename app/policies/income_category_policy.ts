@@ -16,6 +16,10 @@ export default class IncomeCategoryPolicy extends BasePolicy {
     return user.id === incomeCategory.userId
   }
 
+  replace(user: User, incomeCategory: IncomeCategory): AuthorizerResponse {
+    return user.id === incomeCategory.userId
+  }
+
   delete(user: User, incomeCategory: IncomeCategory): AuthorizerResponse {
     return user.id === incomeCategory.userId
   }

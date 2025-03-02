@@ -17,3 +17,14 @@ export const updateIncomeCategoryValidator = vine.compile(
     order: vine.number(),
   })
 )
+
+export const replaceIncomeCategoriesValidator = vine.compile(
+  vine.array(
+    vine.object({
+      id: vine.number().use(existsInRule({ table: 'income_categories', column: 'id' })),
+      name: vine.string().trim().minLength(3).maxLength(48),
+      description: vine.string().trim().escape().maxLength(300).nullable(),
+      order: vine.number(),
+    })
+  )
+)

@@ -18,6 +18,16 @@ export default class CategoryOrderManagementService {
       .decrement('order', 1)
   }
 
+  // async batchUpdateOrder(model: Category, userId: number, categoryOrders: Category[], trx: any) {
+  //   for (const item of categoryOrders) {
+  //     await model
+  //       .query({ client: trx })
+  //       .where('id', item.id)
+  //       .where('user_id', userId)
+  //       .update({ order: item.order })
+  //   }
+  // }
+
   async deleteWithReordering(model: Category, rowItem: InstanceType<Category>) {
     const userId = rowItem.userId
     const orderValue = rowItem.order
