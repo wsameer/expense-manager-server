@@ -19,7 +19,7 @@ export default class SessionController {
   }
 
   /**
-   * Delete record
+   * Delete session / Logout
    */
   async destroy({ auth, response }: HttpContext) {
     await auth.use('web').logout()
