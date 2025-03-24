@@ -136,10 +136,10 @@ export default class TransactionsController {
       const oldAmount = transaction.amount
       const newAmount = validatedData.amount ?? oldAmount
 
-      await Transaction.query({ client: trx }).preload('fromAccount')
+      await transaction.load('fromAccount')
 
-      if (transaction.type.toString() === TransactionType.BANK_TO_BANK) {
-        await Transaction.query({ client: trx }).preload('toAccount')
+      if (transaction.type.toString() !== TransactionType.EXPENSE) {
+        await transaction.load('toAccount')
       }
 
       if (oldAmount !== newAmount) {

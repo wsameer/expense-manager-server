@@ -11,6 +11,9 @@ export class TransactionService {
 
     switch (transaction.type.toString()) {
       case TransactionType.BANK_TO_BANK:
+        if (!transaction.fromAccount || !transaction.toAccount) {
+          throw new Error('fromAccount or toAccount not loaded for BANK_TO_BANK transaction')
+        }
         await transaction.fromAccount.incrementBalance(oldAmount)
         await transaction.fromAccount.decrementBalance(newAmount)
         await transaction.toAccount.decrementBalance(oldAmount)
@@ -18,13 +21,19 @@ export class TransactionService {
         break
 
       case TransactionType.EXPENSE:
+        if (!transaction.fromAccount) {
+          throw new Error('fromAccount not loaded for EXPENSE transaction')
+        }
         await transaction.fromAccount.incrementBalance(oldAmount)
         await transaction.fromAccount.decrementBalance(newAmount)
         break
 
       case TransactionType.INCOME:
-        await transaction.fromAccount.decrementBalance(oldAmount)
-        await transaction.fromAccount.incrementBalance(newAmount)
+        if (!transaction.toAccount) {
+          throw new Error('toAccount not loaded for INCOME transaction')
+        }
+        await transaction.toAccount.decrementBalance(oldAmount)
+        await transaction.toAccount.incrementBalance(newAmount)
         break
     }
   }
