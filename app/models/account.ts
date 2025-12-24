@@ -17,6 +17,9 @@ export default class Account extends BaseModel {
   declare balance: number
 
   @column()
+  declare accountNumber: string | null
+
+  @column()
   declare description: string | null
 
   // Foreign key for User relationship
@@ -35,6 +38,7 @@ export default class Account extends BaseModel {
   @belongsTo(() => Account, {
     foreignKey: 'paymentAccountId',
   })
+
   // property name to access referenced payment account
   declare paymentAccount: BelongsTo<typeof Account>
 
