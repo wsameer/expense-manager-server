@@ -8,6 +8,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * with pretty printed stack traces.
    */
   protected debug = !app.inProduction
+  protected renderStatusPages = app.inProduction
 
   /**
    * The method is used for handling errors and returning
